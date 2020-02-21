@@ -1,13 +1,13 @@
+#For PowerShell v3
+#From https://docs.gitignore.io/install/command-line#powershell-v3-script
+
+
+param(
+	[Parameter(Mandatory=$true)]
+	[string[]]$list
+)
+
 Set-StrictMode -Off;
 
-$usage = "usage:
-gitignore arg ..."
-
-[string[]] $list = $args
-$params = $list -join ","
-
-if(!$params) { $usage ;exit 1 }
-
-invoke-restmethod -uri "https://www.gitignore.io/api/$params"
-
-exit 0
+$params = ($list | ForEach-Object { [uri]::EscapeDataString($_) }) -join ","
+Invoke-WebRequest -Uri "https://www.gitignore.io/api/$params" | select -ExpandProperty content | Out-File -FilePath $(Join-Path -path $pwd -ChildPath ".gitignore") -Encoding ascii
